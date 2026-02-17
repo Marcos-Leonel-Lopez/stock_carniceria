@@ -4,8 +4,13 @@ import { Inject, Injectable } from '@nestjs/common';
 import type { ProductRepository } from './product.repository.interface.js';
 import type { CustomPool } from '../../database/database.types.js';
 import { ProductMapper, type ProductRow } from './product.mapper.js';
+
 import { Product } from '../entities/product.entity.js';
 import { CreateProductDto } from '../dto/create-product.dto.js';
+import {
+	UpdateProductPriceDto,
+	UpdateProductStockDto,
+} from '../dto/update-product.dto.js';
 
 @Injectable()
 export class ProductPgRepository implements ProductRepository {
@@ -73,5 +78,44 @@ export class ProductPgRepository implements ProductRepository {
 			],
 		);
 		return ProductMapper.toProduct(result.rows[0]);
+	}
+
+	async updatePrice(
+		id: number,
+		price: UpdateProductPriceDto,
+	): Promise<Product | null> {
+		const result = await this.pool.query<ProductRow>(
+			'UPDATE producto SET precio = $1, fecha_modificacion = CURRENT_TIMESTAMP WHERE id_producto = $2 RETURNING *',
+			[price.price, id],
+		);
+		return ProductMapper.toProduct(result.rows[0]);
+	}
+
+	async updateStock(
+		id: number,
+		stock: UpdateProductStockDto,
+	): Promise<Product | null> {
+		const result = await this.pool.query<ProductRow>(
+			'UPDATE producto SET stock = $1, fecha_modificacion = CURRENT_TIMESTAMP WHERE id_producto = $2 RETURNING *',
+			[stock.stock, id],
+		);
+		return ProductMapper.toProduct(result.rows[0]);
+	}
+
+	async incrementStock(
+		id: number,
+		stock: UpdateProductStockDto,
+	): Promise<Product | null> {
+		const result = await this.pool.query<ProductRow>(
+			'UPDATE producto SET stock = stock + $1, fecha_modificacion = CURRENT_TIMESTAMP WHERE id_producto = $2 RETURNING *',
+			[stock.stock, id],
+		);
+		return ProductMapper.toProduct(result.rows[0]);
+	}
+
+	async remove(id: number): Promise<void> {
+		await this.pool.query('DELETE FROM producto WHERE id_producto = $1', [
+			id,
+		]);
 	}
 }

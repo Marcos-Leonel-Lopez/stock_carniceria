@@ -4,13 +4,18 @@ import {
 	Param,
 	Query,
 	Body,
+	HttpCode,
 	Get,
 	Post,
-	// Patch,
-	// Delete,
+	Patch,
+	Delete,
 } from '@nestjs/common';
 import type { ProductService } from './services/product.service.interface.js';
 import { CreateProductDto } from './dto/create-product.dto.js';
+import {
+	UpdateProductPriceDto,
+	UpdateProductStockDto,
+} from './dto/update-product.dto.js';
 // import { UpdateProductDto } from './dto/update-product.dto.js';
 
 @Controller('product')
@@ -48,16 +53,34 @@ export class ProductController {
 	create(@Body() createProductDto: CreateProductDto) {
 		return this.productService.create(createProductDto);
 	}
-	// @Patch(':id')
-	// update(
-	// 	@Param('id') id: string,
-	// 	@Body() updateProductDto: UpdateProductDto,
-	// ) {
-	// 	return this.productService.update(+id, updateProductDto);
-	// }
 
-	// @Delete(':id')
-	// remove(@Param('id') id: string) {
-	// 	return this.productService.remove(+id);
-	// }
+	@Patch(':id/price')
+	updatePrice(
+		@Param('id') id: number,
+		@Body() updatePriceDto: UpdateProductPriceDto,
+	) {
+		return this.productService.updatePrice(id, updatePriceDto);
+	}
+
+	@Patch(':id/replaceStock')
+	updateStock(
+		@Param('id') id: number,
+		@Body() updateStockDto: UpdateProductStockDto,
+	) {
+		return this.productService.updateStock(id, updateStockDto);
+	}
+
+	@Patch(':id/incrementStock')
+	incrementStock(
+		@Param('id') id: number,
+		@Body() updateStockDto: UpdateProductStockDto,
+	) {
+		return this.productService.incrementStock(id, updateStockDto);
+	}
+
+	@Delete(':id')
+	@HttpCode(204)
+	remove(@Param('id') id: number) {
+		return this.productService.remove(id);
+	}
 }

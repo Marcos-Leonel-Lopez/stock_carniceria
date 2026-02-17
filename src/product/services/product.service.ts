@@ -1,8 +1,13 @@
 import { Injectable, Inject, ConflictException } from '@nestjs/common';
 import type { ProductService } from './product.service.interface.js';
 import type { ProductRepository } from '../repositories/product.repository.interface.js';
+
 import { Product } from '../entities/product.entity.js';
 import { CreateProductDto } from '../dto/create-product.dto.js';
+import {
+	UpdateProductPriceDto,
+	UpdateProductStockDto,
+} from '../dto/update-product.dto.js';
 // import { UpdateProductDto } from '../dto/update-product.dto.js';
 
 @Injectable()
@@ -41,11 +46,52 @@ export class ProductServiceImpl implements ProductService {
 		}
 		return this.repository.create(createProductDto);
 	}
+
+	async updatePrice(
+		id: number,
+		price: UpdateProductPriceDto,
+	): Promise<Product | null> {
+		const exists = await this.repository.checkExistence(id);
+		if (!exists) {
+			// PENDIENTE: lanzar una excepción personalizada
+			throw new ConflictException(`El producto con ID ${id} no existe.`);
+		}
+		return this.repository.updatePrice(id, price);
+	}
+
+	async updateStock(
+		id: number,
+		stock: UpdateProductStockDto,
+	): Promise<Product | null> {
+		const exists = await this.repository.checkExistence(id);
+		if (!exists) {
+			// PENDIENTE: lanzar una excepción personalizada
+			throw new ConflictException(`El producto con ID ${id} no existe.`);
+		}
+		return this.repository.updateStock(id, stock);
+	}
+
+	async incrementStock(
+		id: number,
+		stock: UpdateProductStockDto,
+	): Promise<Product | null> {
+		const exists = await this.repository.checkExistence(id);
+		if (!exists) {
+			// PENDIENTE: lanzar una excepción personalizada
+			throw new ConflictException(`El producto con ID ${id} no existe.`);
+		}
+		return this.repository.incrementStock(id, stock);
+	}
 	// update(id: number, updateProductDto: UpdateProductDto) {
 	// 	return `This action updates a #${id} product`;
 	// }
 
-	// remove(id: number) {
-	// 	return `This action removes a #${id} product`;
-	// }
+	async remove(id: number) {
+		const exists = await this.repository.checkExistence(id);
+		if (!exists) {
+			// PENDIENTE: lanzar una excepción personalizada
+			throw new ConflictException(`El producto con ID ${id} no existe.`);
+		}
+		return this.repository.remove(id);
+	}
 }
