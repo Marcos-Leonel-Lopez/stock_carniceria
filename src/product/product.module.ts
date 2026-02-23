@@ -1,18 +1,18 @@
 import { Module } from '@nestjs/common';
-import { ProductServiceImpl } from './services/product.service.js';
-import { ProductPgRepository } from './repositories/product.repository.js';
+import { ProductService } from './services/product.service.js';
+import { ProductRepository } from './repositories/product.repository.js';
 import { ProductController } from './product.controller.js';
 
 @Module({
 	controllers: [ProductController],
 	providers: [
 		{
-			provide: 'ProductRepository',
-			useClass: ProductPgRepository,
+			provide: 'IProductRepository',
+			useClass: ProductRepository,
 		},
 		{
-			provide: 'ProductService',
-			useClass: ProductServiceImpl,
+			provide: 'IProductService',
+			useClass: ProductService,
 		},
 	],
 })

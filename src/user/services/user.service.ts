@@ -1,0 +1,62 @@
+import { Injectable, Inject } from '@nestjs/common';
+import { NotFoundException } from '@nestjs/common/exceptions/not-found.exception.js';
+
+import type { IUserService } from './user.service.interface.js';
+import type { IUserRepository } from '../repositories/user.repository.interface.js';
+import type { IHashService } from 'src/security/hash/hash.service.interface.js';
+//import type { UserRepository } from '../repositories/user.repository.interface.js';
+import { CreateUserDto } from '../dto/create-user.dto.js';
+import type { UserResponse } from '../dto/user-response.dto.js';
+//import { UpdateUserDto } from '../dto/update-user.dto.js';
+
+@Injectable()
+export class UserService implements IUserService {
+	constructor(
+		@Inject('IUserRepository')
+		private readonly repository: IUserRepository,
+
+		@Inject('IHashService')
+		private readonly hashService: IHashService,
+	) {}
+	async create(createUserDto: CreateUserDto) {
+		const hashedPassword = await this.hashService.hashPassword(
+			createUserDto.password,
+		);
+		return await this.repository.create({
+			...createUserDto,
+			password: hashedPassword,
+		});
+	}
+
+	async findAll() {
+		return this.repository.findAll();
+	}
+
+	async findOneById(id: number): Promise<UserResponse> {
+		const user = await this.repository.findOneById(id);
+		if (!user) {
+			// PENDIENTE: lanzar una excepción personalizada
+			throw new NotFoundException(`El usuario con ID ${id} no existe.`);
+		}
+		return user;
+	}
+
+	async updateRole(id: number, id_rol: number): Promise<UserResponse> {
+		const user = await this.repository.updateRole(id, id_rol);
+		if (!user) {
+			throw new NotFoundException(`El usuario con ID ${id} no existe.`);
+		}
+		return user;
+	}
+
+	async remove(id: number): Promise<void> {
+		await this.repository.remove(id);
+	}
+	// 	update(id: number, updateUserDto: UpdateUserDto) {
+	// 		return `This action updates a #${id} user`;
+	// 	}
+
+	// 	remove(id: number) {
+	// 		return `This action removes a #${id} user`;
+	// 	}
+}

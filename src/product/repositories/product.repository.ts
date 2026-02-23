@@ -1,9 +1,13 @@
 import { Inject, Injectable } from '@nestjs/common';
 // Importamos la clase Pool solo para usarla como token,
 // pero usaremos una interfaz propia para el tipado.
-import type { ProductRepository } from './product.repository.interface.js';
+import type { IProductRepository } from './product.repository.interface.js';
 import type { CustomPool } from '../../database/database.types.js';
-import { ProductMapper, type ProductRow } from './product.mapper.js';
+import {
+	ProductMapper,
+	type ProductRow,
+	type ListProductRow,
+} from './product.mapper.js';
 
 import { Product } from '../entities/product.entity.js';
 import { CreateProductDto } from '../dto/create-product.dto.js';
@@ -11,9 +15,10 @@ import {
 	UpdateProductPriceDto,
 	UpdateProductStockDto,
 } from '../dto/update-product.dto.js';
+import { ProductListItemDto } from '../dto/list-item-product.dto.js';
 
 @Injectable()
-export class ProductPgRepository implements ProductRepository {
+export class ProductRepository implements IProductRepository {
 	// Usamos nuestra interfaz CustomPool en lugar del tipo 'Pool' de la librería
 	private readonly pool: CustomPool;
 
@@ -32,6 +37,13 @@ export class ProductPgRepository implements ProductRepository {
 		return result.rows.map((row) => ProductMapper.toProduct(row));
 	}
 
+	async findAllList(): Promise<ProductListItemDto[]> {
+		const result = await this.pool.query<ListProductRow>(
+			'SELECT id_producto, nombre FROM producto ORDER BY id_producto',
+		);
+		return result.rows.map((row) => ProductMapper.toListItem(row));
+	}
+
 	async findLowStock(): Promise<Product[]> {
 		const result = await this.pool.query<ProductRow>(
 			'SELECT id_producto, nombre, precio, stock, fecha_modificacion FROM producto ORDER BY stock, id_producto',
@@ -39,12 +51,15 @@ export class ProductPgRepository implements ProductRepository {
 		return result.rows.map((row) => ProductMapper.toProduct(row));
 	}
 
-	async findByName(name: string): Promise<Product[]> {
+	async findByName(name: string): Promise<Product[] | null> {
 		const searchTerm = `%${name}%`;
 		const result = await this.pool.query<ProductRow>(
 			'SELECT id_producto, nombre, precio, stock, fecha_modificacion FROM producto WHERE nombre ILIKE $1 ORDER BY nombre, id_producto',
 			[searchTerm],
 		);
+		if (result.rows.length === 0) {
+			return null;
+		}
 		return result.rows.map((row) => ProductMapper.toProduct(row));
 	}
 

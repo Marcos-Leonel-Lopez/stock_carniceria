@@ -4,11 +4,13 @@ import {
 	UpdateProductPriceDto,
 	UpdateProductStockDto,
 } from '../dto/update-product.dto.js';
+import { ProductListItemDto } from '../dto/list-item-product.dto.js';
 
-export interface ProductService {
+export interface IProductService {
 	findAll(): Promise<Product[]>;
+	findAllList(): Promise<ProductListItemDto[]>;
 	findLowStock(): Promise<Product[]>;
-	findById(id: number): Promise<Product | null>;
+	findById(id: number): Promise<Product>;
 	findByName(name: string): Promise<Product[]>;
 	create(createProductDto: CreateProductDto): Promise<Product | null>;
 	updatePrice(

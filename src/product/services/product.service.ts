@@ -1,6 +1,11 @@
-import { Injectable, Inject, ConflictException } from '@nestjs/common';
-import type { ProductService } from './product.service.interface.js';
-import type { ProductRepository } from '../repositories/product.repository.interface.js';
+import {
+	Injectable,
+	Inject,
+	ConflictException,
+	NotFoundException,
+} from '@nestjs/common';
+import type { IProductService } from './product.service.interface.js';
+import type { IProductRepository } from '../repositories/product.repository.interface.js';
 
 import { Product } from '../entities/product.entity.js';
 import { CreateProductDto } from '../dto/create-product.dto.js';
@@ -8,29 +13,45 @@ import {
 	UpdateProductPriceDto,
 	UpdateProductStockDto,
 } from '../dto/update-product.dto.js';
+import { ProductListItemDto } from '../dto/list-item-product.dto.js';
 // import { UpdateProductDto } from '../dto/update-product.dto.js';
 
 @Injectable()
-export class ProductServiceImpl implements ProductService {
+export class ProductService implements IProductService {
 	constructor(
-		@Inject('ProductRepository')
-		private readonly repository: ProductRepository,
+		@Inject('IProductRepository')
+		private readonly repository: IProductRepository,
 	) {}
 
 	async findAll(): Promise<Product[]> {
 		return this.repository.findAll();
 	}
 
+	async findAllList(): Promise<ProductListItemDto[]> {
+		return this.repository.findAllList();
+	}
+
 	async findLowStock(): Promise<Product[]> {
 		return this.repository.findLowStock();
 	}
 
-	findByName(name: string): Promise<Product[]> {
-		return this.repository.findByName(name);
+	async findByName(name: string): Promise<Product[]> {
+		const products = await this.repository.findByName(name);
+		if (!products) {
+			throw new NotFoundException(
+				`No se encontraron productos con el nombre "${name}".`,
+			);
+		}
+		return products;
 	}
 
-	async findById(id: number): Promise<Product | null> {
-		return this.repository.findById(id);
+	async findById(id: number): Promise<Product> {
+		const product = await this.repository.findById(id);
+		if (!product) {
+			// PENDIENTE: lanzar una excepción personalizada
+			throw new NotFoundException(`El producto con ID ${id} no existe.`);
+		}
+		return product;
 	}
 
 	async create(createProductDto: CreateProductDto): Promise<Product | null> {
@@ -39,7 +60,6 @@ export class ProductServiceImpl implements ProductService {
 		);
 		if (exists) {
 			// PENDIENTE: lanzar una excepción personalizada
-			//return null;
 			throw new ConflictException(
 				`El producto con ID ${createProductDto.id} ya existe.`,
 			);
@@ -54,7 +74,7 @@ export class ProductServiceImpl implements ProductService {
 		const exists = await this.repository.checkExistence(id);
 		if (!exists) {
 			// PENDIENTE: lanzar una excepción personalizada
-			throw new ConflictException(`El producto con ID ${id} no existe.`);
+			throw new NotFoundException(`El producto con ID ${id} no existe.`);
 		}
 		return this.repository.updatePrice(id, price);
 	}
@@ -66,7 +86,7 @@ export class ProductServiceImpl implements ProductService {
 		const exists = await this.repository.checkExistence(id);
 		if (!exists) {
 			// PENDIENTE: lanzar una excepción personalizada
-			throw new ConflictException(`El producto con ID ${id} no existe.`);
+			throw new NotFoundException(`El producto con ID ${id} no existe.`);
 		}
 		return this.repository.updateStock(id, stock);
 	}
@@ -78,19 +98,16 @@ export class ProductServiceImpl implements ProductService {
 		const exists = await this.repository.checkExistence(id);
 		if (!exists) {
 			// PENDIENTE: lanzar una excepción personalizada
-			throw new ConflictException(`El producto con ID ${id} no existe.`);
+			throw new NotFoundException(`El producto con ID ${id} no existe.`);
 		}
 		return this.repository.incrementStock(id, stock);
 	}
-	// update(id: number, updateProductDto: UpdateProductDto) {
-	// 	return `This action updates a #${id} product`;
-	// }
 
 	async remove(id: number) {
 		const exists = await this.repository.checkExistence(id);
 		if (!exists) {
 			// PENDIENTE: lanzar una excepción personalizada
-			throw new ConflictException(`El producto con ID ${id} no existe.`);
+			throw new NotFoundException(`El producto con ID ${id} no existe.`);
 		}
 		return this.repository.remove(id);
 	}

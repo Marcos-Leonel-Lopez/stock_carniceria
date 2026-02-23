@@ -5,12 +5,14 @@ import type {
 	UpdateProductPriceDto,
 	UpdateProductStockDto,
 } from '../dto/update-product.dto.js';
+import type { ProductListItemDto } from '../dto/list-item-product.dto.js';
 
-export interface ProductRepository {
+export interface IProductRepository {
 	findAll(): Promise<Product[]>;
+	findAllList(): Promise<ProductListItemDto[]>;
 	findLowStock(): Promise<Product[]>;
 	findById(id: number): Promise<Product | null>;
-	findByName(name: string): Promise<Product[]>;
+	findByName(name: string): Promise<Product[] | null>;
 	checkExistence(id: number): Promise<boolean>;
 	create(product: CreateProductDto): Promise<Product | null>;
 	updatePrice(
