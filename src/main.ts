@@ -2,9 +2,11 @@ import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module.js';
 import { ValidationPipe } from '@nestjs/common';
 import { config } from './config/config.js';
+import { ExceptionsFilter } from './common/filters/http-exception.filter.js';
 
 async function bootstrap() {
 	const app = await NestFactory.create(AppModule);
+	app.useGlobalFilters(new ExceptionsFilter());
 	app.useGlobalPipes(
 		new ValidationPipe({
 			whitelist: true, // Descarta propiedades que no estén en el DTO

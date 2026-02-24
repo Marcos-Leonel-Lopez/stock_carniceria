@@ -36,7 +36,9 @@ export class UserService implements IUserService {
 		const user = await this.repository.findOneById(id);
 		if (!user) {
 			// PENDIENTE: lanzar una excepción personalizada
-			throw new NotFoundException(`El usuario con ID ${id} no existe.`);
+			throw new NotFoundException(
+				`The user with ID ${id} does not exist.`,
+			);
 		}
 		return user;
 	}
@@ -44,7 +46,9 @@ export class UserService implements IUserService {
 	async updateRole(id: number, id_rol: number): Promise<UserResponse> {
 		const user = await this.repository.updateRole(id, id_rol);
 		if (!user) {
-			throw new NotFoundException(`El usuario con ID ${id} no existe.`);
+			throw new NotFoundException(
+				`The user with ID ${id} does not exist.`,
+			);
 		}
 		return user;
 	}
@@ -52,11 +56,4 @@ export class UserService implements IUserService {
 	async remove(id: number): Promise<void> {
 		await this.repository.remove(id);
 	}
-	// 	update(id: number, updateUserDto: UpdateUserDto) {
-	// 		return `This action updates a #${id} user`;
-	// 	}
-
-	// 	remove(id: number) {
-	// 		return `This action removes a #${id} user`;
-	// 	}
 }
