@@ -16,6 +16,9 @@ const DB_USER = process.env.DB_USER ?? 'postgres';
 const DB_PASSWORD = process.env.DB_PASSWORD ?? '';
 const DB_NAME = process.env.DB_NAME ?? '';
 const TIMEZONE = process.env.TIMEZONE ?? 'UTC';
+//configuracion jwt
+const JWT_SECRET = process.env.JWT_SECRET ?? 'mysecretkey';
+const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN ?? '3600s';
 
 export const config: AppConfig = {
 	port: PORT,
@@ -27,4 +30,8 @@ export const config: AppConfig = {
 		database: DB_NAME,
 	},
 	tz: TIMEZONE,
+	jwt: {
+		secret: JWT_SECRET,
+		expiresIn: parseInt(JWT_EXPIRES_IN, 10),
+	},
 };

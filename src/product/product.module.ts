@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
 import { ProductService } from './services/product.service.js';
 import { ProductRepository } from './repositories/product.repository.js';
-import { ProductController } from './product.controller.js';
+import { ProductController } from './controller/product.controller.js';
 
 @Module({
 	controllers: [ProductController],

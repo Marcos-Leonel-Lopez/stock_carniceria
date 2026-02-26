@@ -10,13 +10,16 @@ import {
 	Patch,
 	Delete,
 	ParseIntPipe,
+	UseGuards,
+	Request,
 } from '@nestjs/common';
-import type { IProductService } from './services/product.service.interface.js';
-import { CreateProductDto } from './dto/create-product.dto.js';
+import type { IProductService } from '../services/product.service.interface.js';
+import { CreateProductDto } from '../dto/create-product.dto.js';
 import {
 	UpdateProductPriceDto,
 	UpdateProductStockDto,
-} from './dto/update-product.dto.js';
+} from '../dto/update-product.dto.js';
+import { AuthGuard } from '@nestjs/passport';
 // import { UpdateProductDto } from './dto/update-product.dto.js';
 
 @Controller('product')
@@ -26,6 +29,7 @@ export class ProductController {
 		private readonly productService: IProductService,
 	) {}
 
+	@UseGuards(AuthGuard('jwt'))
 	@Get()
 	findAll() {
 		return this.productService.findAll();

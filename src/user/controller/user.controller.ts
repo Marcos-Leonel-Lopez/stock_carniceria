@@ -11,8 +11,8 @@ import {
 	Patch,
 } from '@nestjs/common';
 
-import type { IUserService } from './services/user.service.interface.js';
-import { CreateUserDto } from './dto/create-user.dto.js';
+import type { IUserService } from '../services/user.service.interface.js';
+import { CreateUserDto } from '../dto/create-user.dto.js';
 
 @Controller('user')
 export class UserController {
@@ -30,6 +30,12 @@ export class UserController {
 	findOneById(@Param('id', ParseIntPipe) id: number) {
 		return this.userService.findOneById(id);
 	}
+
+	@Get('username/:username')
+	findOneByUsername(@Param('username') username: string) {
+		return this.userService.findOneByUsername(username);
+	}
+
 	@Post()
 	create(@Body() createUserDto: CreateUserDto) {
 		return this.userService.create(createUserDto);

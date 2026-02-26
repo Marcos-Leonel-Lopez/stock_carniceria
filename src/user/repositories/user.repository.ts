@@ -3,7 +3,12 @@ import type { IUserRepository } from './user.repository.interface.js';
 import type { CustomPool } from '../../database/database.types.js';
 import type { CreateUserDto } from '../dto/create-user.dto.js';
 import type { UserResponse } from '../dto/user-response.dto.js';
-import { UserMapper, type UserResponseRow } from './user.mapper.js';
+import type { UserAuthResponse } from '../dto/user-auth.dto.js';
+import {
+	UserMapper,
+	type UserResponseRow,
+	type AuthUserRow,
+} from './user.mapper.js';
 
 @Injectable()
 export class UserRepository implements IUserRepository {
@@ -60,6 +65,24 @@ export class UserRepository implements IUserRepository {
 			return null;
 		}
 		return UserMapper.toUserResponse(result.rows[0]);
+	}
+
+	async findOneByUsername(
+		username: string,
+	): Promise<UserAuthResponse | null> {
+		const result = await this.pool.query<AuthUserRow>(
+			`
+			SELECT u.id_usuario, u.pass, u.nombre, r.rol
+			FROM usuario u
+			INNER JOIN rol r ON r.id_rol = u.id_rol
+			WHERE u.nombre = $1;
+			`,
+			[username],
+		);
+		if (result.rows.length === 0) {
+			return null;
+		}
+		return UserMapper.toAuthUser(result.rows[0]);
 	}
 
 	async updateRole(id: number, id_rol: number): Promise<UserResponse | null> {
