@@ -1,59 +1,3 @@
-// import {
-// 	Catch,
-// 	type ExceptionFilter,
-// 	type ArgumentsHost,
-// 	HttpStatus,
-// 	HttpException,
-// } from '@nestjs/common';
-// import type { Request, Response } from 'express';
-
-// @Catch()
-// export class AllExceptionsFilter implements ExceptionFilter {
-// 	catch(exception: any, host: ArgumentsHost) {
-// 		const ctx = host.switchToHttp();
-// 		const request = ctx.getRequest<Request>();
-// 		const response = ctx.getResponse<Response>();
-
-// 		let status: number = HttpStatus.INTERNAL_SERVER_ERROR;
-// 		let message: string = 'Internal server error';
-// 		let errorType: string = 'SystemError';
-
-// 		if (exception instanceof HttpException) {
-// 			status = exception.getStatus();
-// 			const res = exception.getResponse();
-// 			message = typeof res === 'object' ? (res as any).message : res;
-// 			errorType = 'HttpError';
-// 		} else if (exception.code) {
-// 			errorType = 'DataBaseError';
-// 			switch (exception.code) {
-// 				case '23505':
-// 					status = HttpStatus.CONFLICT;
-// 					message = 'Conflict: Duplicate entry';
-// 					break;
-// 				case '23503':
-// 					status = HttpStatus.BAD_REQUEST;
-// 					message = 'Bad Request: Foreign key violation';
-// 					break;
-// 				case '22P02':
-// 					status = HttpStatus.BAD_REQUEST;
-// 					message = 'Bad Request: Invalid input syntax';
-// 					break;
-// 				default:
-// 					status = HttpStatus.INTERNAL_SERVER_ERROR;
-// 					message = 'Database error';
-// 					break;
-// 			}
-// 		}
-// 		response.status(status).json({
-// 			statusCode: status,
-// 			timestamp: new Date().toISOString(),
-// 			path: request.url,
-// 			message: message, // Mensaje amigable en inglés
-// 			error: errorType,
-// 		});
-// 	}
-// }
-
 import {
 	Catch,
 	type ExceptionFilter,
@@ -80,10 +24,10 @@ export class ExceptionsFilter implements ExceptionFilter {
 		if (exception instanceof HttpException) {
 			status = exception.getStatus();
 			const res = exception.getResponse();
-
 			// Extraemos el mensaje de forma segura
 			if (typeof res === 'object' && res !== null && 'message' in res) {
 				// En NestJS, el cuerpo suele ser { message: string | string[], error: string, statusCode: number }
+				console.log(res);
 				const msg = (res as { message: unknown }).message;
 				message = Array.isArray(msg) ? msg.join(', ') : String(msg);
 			} else {
